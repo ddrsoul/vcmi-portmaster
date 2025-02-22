@@ -1,0 +1,46 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: ubuntu-24.04-arm
+    steps:
+    - uses: docker/setup-docker-action@v4
+      with:
+        daemon-config: |
+          {
+            "debug": true,
+            "features": {
+              "containerd-snapshotter": true
+            }
+          }
+    - uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+    - name: Build Image
+      uses: docker/build-push-action@v2
+      with:
+        file: vcmi/docker/BuildPortmaster-aarch64.dockerfile
+        context: .
+        tags: vcmi-portmaster-build:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+    - name: Build VCMI
+      working-directory: ./vcmi
+      run: docker run --rm -v $PWD/:/vcmi vcmi-portmaster-build
+    - name: Package
+      run: |
+        mkdir --parents ./vcmi-portmaster/libs/; sudo mv ./vcmi/out/build/portmaster-release/bin/*so* $_
+        mkdir --parents ./vcmi-portmaster/libs/AI/; sudo mv ./vcmi/out/build/portmaster-release/bin/AI/*so* $_
+        mkdir --parents ./vcmi-portmaster/bin/; sudo mv ./vcmi/out/build/portmaster-release/bin/vcmi* $_
+        cp -r ./vcmi/Mods ./vcmi-portmaster/Mods
+        cp -r ./vcmi/config ./vcmi-portmaster/config
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: vcmi-portmaster
+        path: vcmi-portmaster
