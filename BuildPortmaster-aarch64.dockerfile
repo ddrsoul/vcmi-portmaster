@@ -10,11 +10,23 @@ RUN rm -f /etc/apt/sources.list.d/kitware.list \
         cmake g++ clang \
         libsdl2-dev libsdl2-image-dev libsdl2-ttf-dev libsdl2-mixer-dev \
         zlib1g-dev libavformat-dev libswscale-dev \
-        libboost-dev libboost-filesystem-dev libboost-system-dev \
-        libboost-thread-dev libboost-program-options-dev libboost-locale-dev libboost-iostreams-dev \
         qtbase5-dev libtbb-dev libluajit-5.1-dev liblzma-dev libsqlite3-dev libminizip-dev \
         qttools5-dev ninja-build ccache \
+        wget python3-dev libbz2-dev libicu-dev \
     && apt-get clean
+
+# Собираем Boost 1.74.0 из исходников (требуется для VCMI >=1.7.3)
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz \
+    && tar xzf boost_1_74_0.tar.gz \
+    && cd boost_1_74_0 \
+    && ./bootstrap.sh --prefix=/usr/local --with-libraries=date_time,filesystem,locale,program_options,system,thread,iostreams \
+    && ./b2 install -j$(nproc) \
+    && cd .. \
+    && rm -rf boost_1_74_0*
+
+# Удаляем системный Boost, чтобы избежать конфликтов
+RUN apt-get remove -y libboost-dev libboost-*-dev \
+    && apt-get autoremove -y
 
 # Устанавливаем более свежий CMake для поддержки presets
 RUN apt-get remove -y cmake \
