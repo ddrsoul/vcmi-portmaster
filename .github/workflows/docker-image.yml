@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04-arm
+    runs-on: ubuntu-24.04-arm
     steps:
     - uses: docker/setup-docker-action@v4
       with:
@@ -23,7 +23,7 @@ jobs:
     - name: Build Image
       uses: docker/build-push-action@v2
       with:
-        file: vcmi/docker/BuildPortmaster-aarch64.dockerfile
+        file: /BuildPortmaster-aarch64.dockerfile
         context: .
         tags: vcmi-portmaster-build:latest
         cache-from: type=gha
