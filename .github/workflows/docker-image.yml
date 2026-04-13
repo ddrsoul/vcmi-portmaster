@@ -1,10 +1,12 @@
 name: Build
 
 on:
+  workflow_dispatch:   # <-- добавить эту строку
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+
 jobs:
   build:
     runs-on: ubuntu-24.04-arm
