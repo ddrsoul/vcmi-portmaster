@@ -23,7 +23,7 @@ jobs:
     - name: Build Image
       uses: docker/build-push-action@v2
       with:
-        file: /BuildPortmaster-aarch64.dockerfile
+        file: BuildPortmaster-aarch64.dockerfile
         context: .
         tags: vcmi-portmaster-build:latest
         cache-from: type=gha
