@@ -1,0 +1,41 @@
+name: Update VCMI Submodule to Specific Tag
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'VCMI tag to checkout (e.g. 1.7.3, v1.7.3)'
+        required: true
+        type: string
+        default: '1.7.3'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Полная история для корректной работы с подмодулями
+
+      - name: Setup Git user
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Initialize submodule
+        run: git submodule update --init --recursive
+
+      - name: Update vcmi submodule to specified tag
+        run: |
+          cd vcmi
+          git fetch --tags
+          git checkout ${{ github.event.inputs.tag }}
+          cd ..
+          git add vcmi
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "chore: update vcmi submodule to tag ${{ github.event.inputs.tag }}"
+            git push
+          fi
