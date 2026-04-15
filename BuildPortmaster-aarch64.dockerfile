@@ -40,6 +40,17 @@ RUN apt-get remove -y cmake \
     && cd .. \
     && rm -rf cmake-3.31.5*
 
+# Собираем libsquish из исходников
+RUN wget https://sourceforge.net/projects/libsquish/files/libsquish-1.15.tgz \
+    && tar xzf libsquish-1.15.tgz \
+    && cd libsquish-1.15 \
+    && mkdir build && cd build \
+    && cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local \
+    && make -j$(nproc) \
+    && make install \
+    && cd ../.. \
+    && rm -rf libsquish-1.15*
+
 CMD ["sh", "-c", " \
     cd /vcmi ; \
     # Исправляем симлинк SDL2, если он уже существует — не проблема
