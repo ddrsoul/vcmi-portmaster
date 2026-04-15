@@ -16,7 +16,7 @@ RUN rm -f /etc/apt/sources.list.d/kitware.list \
     && apt-get clean
 
 # Собираем Boost 1.74.0 из исходников (требуется для VCMI >=1.7.3)
-RUN wget https://archives.boost.io/release/1.74.0/source/boost_1_74_0.tar.gz \
+RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz \
     && tar xzf boost_1_74_0.tar.gz \
     && cd boost_1_74_0 \
     && ./bootstrap.sh --prefix=/usr/local --with-libraries=date_time,filesystem,locale,program_options,system,thread,iostreams \
@@ -42,8 +42,10 @@ RUN apt-get remove -y cmake \
 
 CMD ["sh", "-c", " \
     cd /vcmi ; \
-    ln -s /usr/lib/libSDL2.so /usr/lib/aarch64-linux-gnu/libSDL2.so ; \
-    cmake --preset portmaster-release ; \
+    # Исправляем симлинк SDL2, если он уже существует — не проблема
+    ln -sf /usr/lib/libSDL2.so /usr/lib/aarch64-linux-gnu/libSDL2.so ; \
+    # Конфигурируем с отключением MMAI
+    cmake --preset portmaster-release -DENABLE_MMAI=OFF ; \
     cmake --build --preset portmaster-release ; \
     ldd /vcmi/out/build/portmaster-release/bin/vcmiclient | grep -e libboost -e libtbb -e libicu | awk 'NF == 4 { system(\"cp \" $3 \" /vcmi/out/build/portmaster-release/bin/\") }' \
 "]
