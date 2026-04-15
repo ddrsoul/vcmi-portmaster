@@ -16,7 +16,7 @@ RUN rm -f /etc/apt/sources.list.d/kitware.list \
     && apt-get clean
 
 # Собираем Boost 1.74.0 из исходников (требуется для VCMI >=1.7.3)
-RUN wget https://boostorg.jfrog.io/artifactory/main/release/1.74.0/source/boost_1_74_0.tar.gz \
+RUN wget https://archives.boost.io/release/1.74.0/source/boost_1_74_0.tar.gz \
     && tar xzf boost_1_74_0.tar.gz \
     && cd boost_1_74_0 \
     && ./bootstrap.sh --prefix=/usr/local --with-libraries=date_time,filesystem,locale,program_options,system,thread,iostreams \
